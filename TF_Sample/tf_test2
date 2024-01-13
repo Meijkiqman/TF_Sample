@@ -1,0 +1,34 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+import tensorflow as tf 
+from tensorflow import keras
+from keras import layers, regularizers
+from keras.datasets import mnist
+#RNN - rrecuring neural network
+print(tf.config.list_physical_devices('CPU'))
+physical_devices = tf.config.list_physical_devices('CPU')
+
+(x_train, y_train), (x_test,y_test) = mnist.load_data()
+x_train = x_train.astype("float32") / 255.0 # we devide by 255 to get the normalized product in between 0 and 1
+x_test = x_test.astype("float32") / 255.0
+
+model = keras.Sequential()
+model.add(keras.Input(shape=(None, 28)))
+model.add(
+    layers.SimpleRNN(512, return_sequences=True, activation='relu')#will return every timestep, of which there are 28 of.
+)
+
+model.add(layers.SimpleRNN(512, activation='relu'))
+model.add(layers.Dense(10))
+
+model.compile(
+    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+    optimizer=keras.optimizers.Adam(learning_rate=0.001),
+    metrics=["accuracy"]
+)
+
+model.fit(x_train, y_train, batch_size=64, epochs=10, verbose=2)
+model.evaluate(x_test, y_test, batch_size=64, verbose=2)
+
+#print(model.summary())
